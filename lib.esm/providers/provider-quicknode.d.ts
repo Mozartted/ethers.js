@@ -47,13 +47,13 @@ export declare class QuickNodeProvider extends JsonRpcProvider implements Commun
     /**
      *  Creates a new **QuickNodeProvider**.
      */
-    constructor(_network?: Networkish, token?: null | string);
+    constructor(_network?: Networkish, token?: null | string, prefix?: string);
     _getProvider(chainId: number): AbstractProvider;
     isCommunityResource(): boolean;
     /**
      *  Returns a new request prepared for %%network%% and the
      *  %%token%%.
      */
-    static getRequest(network: Network, token?: null | string): FetchRequest;
+    static getRequest(network: Network, token?: null | string, prefix?: string): FetchRequest;
 }
 //# sourceMappingURL=provider-quicknode.d.ts.map
