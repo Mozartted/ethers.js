@@ -73,6 +73,8 @@ function getHost(name, prefix) {
             return `${prefix_domain}.optimism-sepolia.quiknode.pro`;
         case "xdai":
             return `${prefix_domain}.xdai.quiknode.pro`;
+        case "tron":
+            return `${prefix_domain}.tron-mainnet.quiknode.pro`;
     }
     (0, index_js_1.assertArgument)(false, "unsupported network", "network", name);
 }
