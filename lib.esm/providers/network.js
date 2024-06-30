@@ -6,7 +6,7 @@
  */
 import { accessListify } from "../transaction/index.js";
 import { getBigInt, assert, assertArgument } from "../utils/index.js";
-import { EnsPlugin, FetchUrlFeeDataNetworkPlugin, GasCostPlugin } from "./plugins-network.js";
+import { EnsPlugin, FetchUrlFeeDataNetworkPlugin, GasCostPlugin, } from "./plugins-network.js";
 /* * * *
 // Networks which operation against an L2 can use this plugin to
 // specify how to access L1, for the purpose of resolving ENS,
@@ -53,13 +53,21 @@ export class Network {
      *  This is the canonical name, as networks migh have multiple
      *  names.
      */
-    get name() { return this.#name; }
-    set name(value) { this.#name = value; }
+    get name() {
+        return this.#name;
+    }
+    set name(value) {
+        this.#name = value;
+    }
     /**
      *  The network chain ID.
      */
-    get chainId() { return this.#chainId; }
-    set chainId(value) { this.#chainId = getBigInt(value, "chainId"); }
+    get chainId() {
+        return this.#chainId;
+    }
+    set chainId(value) {
+        this.#chainId = getBigInt(value, "chainId");
+    }
     /**
      *  Returns true if %%other%% matches this network. Any chain ID
      *  must match, and if no chain ID is present, the name must match.
@@ -71,30 +79,30 @@ export class Network {
         if (other == null) {
             return false;
         }
-        if (typeof (other) === "string") {
+        if (typeof other === "string") {
             try {
-                return (this.chainId === getBigInt(other));
+                return this.chainId === getBigInt(other);
             }
             catch (error) { }
-            return (this.name === other);
+            return this.name === other;
         }
-        if (typeof (other) === "number" || typeof (other) === "bigint") {
+        if (typeof other === "number" || typeof other === "bigint") {
             try {
-                return (this.chainId === getBigInt(other));
+                return this.chainId === getBigInt(other);
             }
             catch (error) { }
             return false;
         }
-        if (typeof (other) === "object") {
+        if (typeof other === "object") {
             if (other.chainId != null) {
                 try {
-                    return (this.chainId === getBigInt(other.chainId));
+                    return this.chainId === getBigInt(other.chainId);
                 }
                 catch (error) { }
                 return false;
             }
             if (other.name != null) {
-                return (this.name === other.name);
+                return this.name === other.name;
             }
             return false;
         }
@@ -123,14 +131,14 @@ export class Network {
      *  a fragment.
      */
     getPlugin(name) {
-        return (this.#plugins.get(name)) || null;
+        return this.#plugins.get(name) || null;
     }
     /**
      *  Gets a list of all plugins that match %%name%%, with otr without
      *  a fragment.
      */
     getPlugins(basename) {
-        return (this.plugins.filter((p) => (p.name.split("#")[0] === basename)));
+        return (this.plugins.filter((p) => p.name.split("#")[0] === basename));
     }
     /**
      *  Create a copy of this Network.
@@ -149,7 +157,8 @@ export class Network {
      *  values.
      */
     computeIntrinsicGas(tx) {
-        const costs = this.getPlugin("org.ethers.plugins.network.GasCost") || (new GasCostPlugin());
+        const costs = this.getPlugin("org.ethers.plugins.network.GasCost") ||
+            new GasCostPlugin();
         let gas = costs.txBase;
         if (tx.to == null) {
             gas += costs.txCreate;
@@ -167,7 +176,9 @@ export class Network {
         if (tx.accessList) {
             const accessList = accessListify(tx.accessList);
             for (const addr in accessList) {
-                gas += costs.txAccessListAddress + costs.txAccessListStorageKey * accessList[addr].storageKeys.length;
+                gas +=
+                    costs.txAccessListAddress +
+                        costs.txAccessListStorageKey * accessList[addr].storageKeys.length;
             }
         }
         return gas;
@@ -182,30 +193,30 @@ export class Network {
             return Network.from("mainnet");
         }
         // Canonical name or chain ID
-        if (typeof (network) === "number") {
+        if (typeof network === "number") {
             network = BigInt(network);
         }
-        if (typeof (network) === "string" || typeof (network) === "bigint") {
+        if (typeof network === "string" || typeof network === "bigint") {
             const networkFunc = Networks.get(network);
             if (networkFunc) {
                 return networkFunc();
             }
-            if (typeof (network) === "bigint") {
+            if (typeof network === "bigint") {
                 return new Network("unknown", network);
             }
             assertArgument(false, "unknown network", "network", network);
         }
         // Clonable with network-like abilities
-        if (typeof (network.clone) === "function") {
+        if (typeof network.clone === "function") {
             const clone = network.clone();
             //if (typeof(network.name) !== "string" || typeof(network.chainId) !== "number") {
             //}
             return clone;
         }
         // Networkish
-        if (typeof (network) === "object") {
-            assertArgument(typeof (network.name) === "string" && typeof (network.chainId) === "number", "invalid network object name or chainId", "network", network);
-            const custom = new Network((network.name), (network.chainId));
+        if (typeof network === "object") {
+            assertArgument(typeof network.name === "string" && typeof network.chainId === "number", "invalid network object name or chainId", "network", network);
+            const custom = new Network(network.name, network.chainId);
             if (network.ensAddress || network.ensNetwork != null) {
                 custom.attachPlugin(new EnsPlugin(network.ensAddress, network.ensNetwork));
             }
@@ -221,7 +232,7 @@ export class Network {
      *  an instance of a Network representing that chain.
      */
     static register(nameOrChainId, networkFunc) {
-        if (typeof (nameOrChainId) === "number") {
+        if (typeof nameOrChainId === "number") {
             nameOrChainId = BigInt(nameOrChainId);
         }
         const existing = Networks.get(nameOrChainId);
@@ -271,7 +282,8 @@ function getGasStationPlugin(url) {
         let response;
         try {
             const [_response, _feeData] = await Promise.all([
-                request.send(), fetchFeeData()
+                request.send(),
+                fetchFeeData(),
             ]);
             response = _response;
             const payload = response.bodyJson.standard;
@@ -341,23 +353,22 @@ function injectCommonNetworks() {
     registerEth("linea-sepolia", 59141, {});
     registerEth("matic", 137, {
         ensNetwork: 1,
-        plugins: [
-            getGasStationPlugin("https:/\/gasstation.polygon.technology/v2")
-        ]
+        plugins: [getGasStationPlugin("https://gasstation.polygon.technology/v2")],
     });
     registerEth("matic-amoy", 80002, {});
     registerEth("matic-mumbai", 80001, {
         altNames: ["maticMumbai", "maticmum"],
         plugins: [
-            getGasStationPlugin("https:/\/gasstation-testnet.polygon.technology/v2")
-        ]
+            getGasStationPlugin("https://gasstation-testnet.polygon.technology/v2"),
+        ],
     });
     registerEth("optimism", 10, {
         ensNetwork: 1,
-        plugins: []
+        plugins: [],
     });
     registerEth("optimism-goerli", 420, {});
     registerEth("optimism-sepolia", 11155420, {});
     registerEth("xdai", 100, { ensNetwork: 1 });
+    registerEth("tron", 1000, { ensNetwork: 1000, altNames: ["tronMainnet"] });
 }
 //# sourceMappingURL=network.js.map
